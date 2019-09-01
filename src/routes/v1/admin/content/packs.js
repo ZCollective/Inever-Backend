@@ -89,7 +89,6 @@ router.post('/updatePack', requireLogin, requireRole(1), async (req, res) => {
     var updates = req.body.updates
     var additions = req.body.additions
 
-
     if (!packid || !packname || !description || !keywords || !minage) {
       logger.debug('Could not read all required fields from body')
       res.locals.sendError(res, 'BAD_REQUEST', 400)
@@ -107,42 +106,45 @@ router.post('/updatePack', requireLogin, requireRole(1), async (req, res) => {
 
       logger.debug('Query is: ' + updatePackQuery)
 
-      await res.locals.mysql.query(updatePackQuery, [ packname, description, keywords, minage, packid ])
-
-      if (Array.isArray(updates) && updates.length > 0) {
-        logger.debug('Found Questions to Update!')
-        var updateQuestionsQuery = `REPLACE INTO ${questionTable.name}
+      let [results] = await res.locals.mysql.query(updatePackQuery, [packname, description, keywords, minage, packid])
+      if (results.changedRows === 0) {
+        logger.error('There is no Pack with ID: ' + packid + '! Returning Error!')
+        res.locals.sendError(res, 'INVALID_PACK_ID', 400)
+      } else {
+        if (Array.isArray(updates) && updates.length > 0) {
+          logger.debug('Found Questions to Update!')
+          var updateQuestionsQuery = `REPLACE INTO ${questionTable.name}
         (${questionTable.columns.id}, ${questionTable.columns.string}, ${questionTable.columns.content_pack_id_fk})
         VALUES ?`
-        var valueArray = [updates
-          .filter((update) => { return (update.questionid && update.string) })
-          .map((update) => { return [update.questionid, update.string, packid] })]
+          var valueArray = [updates
+            .filter((update) => { return (update.questionid && update.string) })
+            .map((update) => { return [update.questionid, update.string, packid] })]
 
-        try {
-          await res.locals.mysql.query(updateQuestionsQuery, valueArray)
-        } catch (error) {
-          logger.error('002-005 | Error when replacing Questions in Database: ' + error)
-          res.locals.sendError(res, 'INTERNAL_ERROR_002-005')
+          try {
+            await res.locals.mysql.query(updateQuestionsQuery, valueArray)
+          } catch (error) {
+            logger.error('002-005 | Error when replacing Questions in Database: ' + error)
+            res.locals.sendError(res, 'INTERNAL_ERROR_002-005')
+          }
         }
-      }
 
-      if (Array.isArray(additions) && additions.length > 0) {
-        logger.debug('Found Questions to Add!')
-        var additionArray = [additions
-          .filter((addition) => { return (addition.string) })
-          .map((addition) => { return [addition.string, packid] })]
+        if (Array.isArray(additions) && additions.length > 0) {
+          logger.debug('Found Questions to Add!')
+          var additionArray = [additions
+            .filter((addition) => { return (addition.string) })
+            .map((addition) => { return [addition.string, packid] })]
 
-        var insertQuestionQuery = `INSERT INTO ${questionTable.name} (${questionTable.columns.string}, ${questionTable.columns.content_pack_id_fk}) VALUES ?`
-        try {
-          await res.locals.mysql.query(insertQuestionQuery, additionArray)
-        } catch (error) {
-          logger.error('002-006 | Error when inserting new Questions into Database: ' + error)
-          res.locals.sendError(res, 'INTERNAL_ERROR_002-006')
+          var insertQuestionQuery = `INSERT INTO ${questionTable.name} (${questionTable.columns.string}, ${questionTable.columns.content_pack_id_fk}) VALUES ?`
+          try {
+            await res.locals.mysql.query(insertQuestionQuery, additionArray)
+          } catch (error) {
+            logger.error('002-006 | Error when inserting new Questions into Database: ' + error)
+            res.locals.sendError(res, 'INTERNAL_ERROR_002-006')
+          }
         }
+        logger.debug('Updated Content Pack, and updated/inserted Questions (if there were any)')
+        res.locals.sendSuccess(res, 'ALL_FINE')
       }
-
-      logger.debug('Updated Content Pack, and updated/inserted Questions (if there were any)')
-      res.locals.sendSuccess(res, 'ALL_FINE')
     }
   } catch (error) {
     logger.error('002-004 | Fatal error occurred during /updatePack: ' + error)
