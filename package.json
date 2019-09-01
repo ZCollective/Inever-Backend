@@ -8,6 +8,10 @@
     "start": "nodemon src/master.js",
     "lint": "standard --fix ."
   },
+  "bin": "src/master.js",
+  "pkg": {
+    "scripts": ["config/**/*.js"]
+  },
   "author": "michael zigldrum",
   "license": "ISC",
   "dependencies": {

@@ -8,6 +8,7 @@ var winston = require('winston')
 var session = require('express-session')
 var MySQLStore = require('express-mysql-session')(session)
 var https = require('https')
+var http = require('http')
 
 var config = require('../config/conf').get(process.env.NODE_ENV)
 
@@ -91,11 +92,19 @@ exports.startServer = function () {
       res.status(404).send(JSON.stringify({ error: true, success: false, msg: 'Could not find the requested resource!' }))
     })
 
-    logger.info('Starting Listener on Port: ' + config.general.port)
-    var httpsServer = https.createServer({ key: key, cert: cert }, app)
-    httpsServer.listen(config.general.port)
+    if(process.env.NODE_ENV === 'production') {
+      logger.info('Starting Listener on Port: ' + config.general.port)
+      var httpsServer = https.createServer({ key: key, cert: cert }, app)
+      httpsServer.listen(config.general.port)  
+      logger.info('HTTPS REST Server Startup Complete.')
+    } else {
+      logger.info('Running Dev mode. Not using TLS...')
+      logger.info('Starting Listener on Port: ' + config.general.port)
+      var httpServer = http.createServer(app)
+      httpServer.listen(config.general.port)  
+      logger.info('HTTP REST Server Startup Complete.')
+    }
 
-    logger.info('HTTPS REST Server Startup Complete.')
   } catch (error) {
     logger.error('Fatal error has occurred in HTTPS REST Server ' + process.pid + ' : ' + error)
     logger.error('Stacktrace: ' + error.stack)
