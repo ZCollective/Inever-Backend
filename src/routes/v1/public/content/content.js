@@ -51,8 +51,8 @@ router.get('/packs/:packid/questions', async (req, res) => {
       var questionTable = db.tables.question
       var getQuestionQuery = `SELECT ${questionTable.columns.id} AS id,
       ${questionTable.columns.string} AS string,
-      ${questionTable.columns.content_pack_id_fk} AS packid FROM ${questionTable.name}`
-      var [results] = await res.locals.mysql.query(getQuestionQuery)
+      ${questionTable.columns.content_pack_id_fk} AS packid FROM ${questionTable.name} WHERE ${questionTable.columns.content_pack_id_fk}=?`
+      var [results] = await res.locals.mysql.query(getQuestionQuery, [packid])
       logger.debug('Got ' + results.length + ' Results from Database')
       res.locals.sendSuccess(res, results)
     }
