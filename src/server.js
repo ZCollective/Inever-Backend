@@ -92,7 +92,7 @@ exports.startServer = function () {
       res.status(404).send(JSON.stringify({ error: true, success: false, msg: 'Could not find the requested resource!' }))
     })
 
-    if(process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production') {
       logger.info('Starting Listener on Port: ' + config.general.port)
       var httpsServer = https.createServer({ key: key, cert: cert }, app)
       httpsServer.listen(config.general.port)  

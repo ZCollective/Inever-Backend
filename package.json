@@ -10,7 +10,9 @@
   },
   "bin": "src/master.js",
   "pkg": {
-    "scripts": ["config/**/*.js"]
+    "scripts": [
+      "config/**/*.js"
+    ]
   },
   "author": "michael zigldrum",
   "license": "ISC",
@@ -26,7 +28,8 @@
     "mysql2": "^1.6.5",
     "nodemon": "^1.19.0",
     "path": "^0.12.7",
-    "winston": "^3.2.1"
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.0.0"
   },
   "devDependencies": {
     "standard": "^12.0.1"
