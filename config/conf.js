@@ -5,10 +5,13 @@ var path = require('path')
 var transport = new (winston.transports.DailyRotateFile)({
   frequency: '24h',
   filename: 'ihnn-%DATE%.log',
-  datePattern: 'YYY-MM-DD-HH',
-  maxSize: '10m'
+  dirname: 'logs',
+  datePattern: 'YYY-MM-DD-HH'
 })
 
+transport.on('rotate', () => {
+  console.log('Rotating File!')
+})
 var config = {
   production: {
     cors: {
