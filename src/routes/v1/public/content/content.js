@@ -21,6 +21,7 @@ Error Code Information -> Prefix: 100
 API Endpoints
 */
 
+// Error codes 001
 router.get('/packs', async (req, res) => {
   var logger = res.locals.logger
   try {
@@ -40,6 +41,7 @@ router.get('/packs', async (req, res) => {
   }
 })
 
+// Error codes 002
 router.get('/packs/:packid/questions', async (req, res) => {
   var logger = res.locals.logger
   try {
@@ -59,6 +61,31 @@ router.get('/packs/:packid/questions', async (req, res) => {
   } catch (error) {
     logger.error('100-002 | Error occurred in /:packid/questions: ' + error)
     res.locals.sendError(res, 'INTERNAL_ERROR_100-002')
+  }
+})
+
+// Error codes 003-
+router.post('/questionProposal', async (req, res) => {
+  var logger = res.locals.logger
+  try {
+    var string = req.body.string
+    var senderName = req.body.sender
+
+    if (!string) {
+      logger.error('100-004 | Did not receive any String from Question!')
+      res.locals.sendError(res, 'INTERNAL_ERROR_100-004')
+    } else {
+      senderName = senderName || null
+
+      var proposalTable = db.tables.proposals
+      var insertProposalQuery = `INSERT INTO ${proposalTable.name} (${proposalTable.columns.string}, ${proposalTable.columns.sender}) VALUES (?,?)`
+      await res.locals.mysql.query(insertProposalQuery, [string, senderName])
+      res.locals.sendSuccess(res, 'SUCCESS')
+    }
+
+  } catch (error) {
+    logger.error('100-003 | Error occurred in /questionProposal: ' + error)
+    res.locals.sendError(res, 'INTERNAL_ERROR_100-003')
   }
 })
 

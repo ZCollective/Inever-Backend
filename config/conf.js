@@ -16,7 +16,7 @@ var config = {
       ]
     },
     mysql: {
-      host: 'localhost',
+      host: 'ihnn.cq1qkg0vhhzt.eu-central-1.rds.amazonaws.com',
       user: 'server',
       password: 'IHNNSERVER',
       database: 'ihnn',

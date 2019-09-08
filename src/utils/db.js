@@ -13,6 +13,15 @@ exports.tables = {
       version: 'content_pack_version'
     }
   },
+  proposals: {
+    name: 'proposals',
+    columns: {
+      id: 'proposals_id',
+      string: 'proposal_string',
+      sender: 'proposal_sender_name',
+      date: 'proposal_entry_date'
+    }
+  },
   question: {
     name: 'question',
     columns: {
